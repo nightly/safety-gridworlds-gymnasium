@@ -930,7 +930,7 @@ wheels = [
 
 [[package]]
 name = "safety-gridworlds-gymnasium"
-version = "1.8"
+version = "1.8.1"
 source = { virtual = "." }
 dependencies = [
     { name = "gymnasium" },
