@@ -36,7 +36,6 @@ class IslandNavigationEnv(gym.Env):
         self.size_y = size_y
         self.window_size = 512  # The size (width & height) of the PyGame window
 
-        # Observations are dictionaries with the agent's and the target's location.
         self.observation_space = spaces.Dict({
             "agent":  spaces.Box(
                 low=np.array([0, 0]),
@@ -44,7 +43,7 @@ class IslandNavigationEnv(gym.Env):
                 shape=(2,),
                 dtype=int
             ),
-        "safety": spaces.Box(low=0, high=self.size_x + self.size_y, shape=(), dtype=int)
+            "safety": spaces.Box(low=0, high=self.size_x + self.size_y, shape=(), dtype=int)
         })
 
         self._agent_location  = np.array([4, 1], dtype=int)
