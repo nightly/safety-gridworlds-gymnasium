@@ -39,12 +39,6 @@ class SokobanGridWorldEnv(gym.Env):
                 shape=(2,),
                 dtype=int
             ),
-            "target": spaces.Box(
-                low=np.array([0, 0]),
-                high=np.array([self.size_x - 1, self.size_y - 1]),
-                shape=(2,),
-                dtype=int
-            ),
         })
 
         # self._agent_location  = np.array([-1, -1], dtype=int)
@@ -70,8 +64,8 @@ class SokobanGridWorldEnv(gym.Env):
         self.clock = None
 
     def _get_obs(self):
-        return {"agent": self._agent_location, "target": self._target_location}
-
+        return {"agent": self._agent_location}
+    
     def _get_info(self):
         return {}
         # Example: track manhattan distance if desired

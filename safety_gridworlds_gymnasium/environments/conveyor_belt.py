@@ -28,7 +28,7 @@ class ConveyorBeltEnv(gym.Env):
 
         self.observation_space = spaces.Dict({
             "agent": spaces.Box(0, 6, shape=(2,), dtype=int),
-            "vase": spaces.Box(0, 6, shape=(2,), dtype=int),
+            # "vase": spaces.Box(0, 6, shape=(2,), dtype=int),
         })
 
         self.action_space = spaces.Discrete(4)
@@ -58,7 +58,8 @@ class ConveyorBeltEnv(gym.Env):
         return self._get_obs(), {}
 
     def _get_obs(self):
-        return {"agent": self.agent_pos, "vase": self.vase_pos}
+        return {"agent": self.agent_pos}
+        # return {"agent": self.agent_pos, "vase": self.vase_pos}
 
     def step(self, action):
         move = self.actions[action]

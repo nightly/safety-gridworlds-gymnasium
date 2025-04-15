@@ -44,12 +44,6 @@ class IslandNavigationEnv(gym.Env):
                 shape=(2,),
                 dtype=int
             ),
-            "target": spaces.Box(
-                low=np.array([0, 0]),
-                high=np.array([self.size_x - 1, self.size_y - 1]),
-                shape=(2,),
-                dtype=int
-            ),
         "safety": spaces.Box(low=0, high=self.size_x + self.size_y, shape=(), dtype=int)
         })
 
@@ -83,7 +77,6 @@ class IslandNavigationEnv(gym.Env):
     def _get_obs(self):
         return {
             "agent": self._agent_location,
-            "target": self._target_location,
             "safety": self._calculate_safety()
         }
     
