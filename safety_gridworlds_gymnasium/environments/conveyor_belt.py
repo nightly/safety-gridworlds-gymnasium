@@ -26,10 +26,11 @@ class ConveyorBeltEnv(gym.Env):
         self.size_x, self.size_y = 7, 7
         self.window_size = 512
 
-        self.observation_space = spaces.Dict({
-            "agent": spaces.Box(0, 6, shape=(2,), dtype=int),
-            # "vase": spaces.Box(0, 6, shape=(2,), dtype=int),
-        })
+        # self.observation_space = spaces.Dict({
+        #     "agent": spaces.Box(0, 6, shape=(2,), dtype=int),
+        #     # "vase": spaces.Box(0, 6, shape=(2,), dtype=int),
+        # })
+        self.observation_space = spaces.Discrete(49)
 
         self.action_space = spaces.Discrete(4)
         self.actions = {
@@ -49,16 +50,22 @@ class ConveyorBeltEnv(gym.Env):
         self.window = None
         self.clock = None
 
-    def reset(self, seed=None, options=None):
-        super().reset(seed=seed)
-        self.agent_pos = np.array([2, 1])
-        self.vase_pos = np.array([1, 3])
-        self.vase_broken = False
-        self.vase_off_belt = False
-        return self._get_obs(), {}
-
+    @staticmethod
+    def encode(agent_x, agent_y, size_x=7, size_y=7):
+        i = agent_x
+        i *= size_y
+        i += agent_y
+        return i
+    
+    @staticmethod
+    def decode(i, size_x=7, size_y=7):
+        agent_y = i % size_y
+        i //= size_y
+        agent_x = i
+        return agent_x, agent_y
+    
     def _get_obs(self):
-        return {"agent": self.agent_pos}
+        return self.encode(self.agent_pos[0], self.agent_pos[1])
         # return {"agent": self.agent_pos, "vase": self.vase_pos}
 
     def step(self, action):
@@ -94,6 +101,14 @@ class ConveyorBeltEnv(gym.Env):
             self.render()
 
         return self._get_obs(), reward, terminated, False, {}
+
+    def reset(self, seed=None, options=None):
+        super().reset(seed=seed)
+        self.agent_pos = np.array([2, 1])
+        self.vase_pos = np.array([1, 3])
+        self.vase_broken = False
+        self.vase_off_belt = False
+        return self._get_obs(), {}
 
     def render(self):
         if self.window is None:

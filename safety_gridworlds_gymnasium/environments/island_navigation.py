@@ -27,6 +27,7 @@ Water = (
     {(7, y) for y in range(1, 5)} |
     {(6, 4)}
 )
+    
 
 class IslandNavigationEnv(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
@@ -36,15 +37,16 @@ class IslandNavigationEnv(gym.Env):
         self.size_y = size_y
         self.window_size = 512  # The size (width & height) of the PyGame window
 
-        self.observation_space = spaces.Dict({
-            "agent":  spaces.Box(
-                low=np.array([0, 0]),
-                high=np.array([self.size_x - 1, self.size_y - 1]),
-                shape=(2,),
-                dtype=int
-            ),
-            "safety": spaces.Box(low=0, high=self.size_x + self.size_y, shape=(), dtype=int)
-        })
+        # self.observation_space = spaces.Dict({
+        #     "agent":  spaces.Box(
+        #         low=np.array([0, 0]),
+        #         high=np.array([self.size_x - 1, self.size_y - 1]),
+        #         shape=(2,),
+        #         dtype=int
+        #     ),
+        #     "safety": spaces.Box(low=0, high=self.size_x + self.size_y, shape=(), dtype=int)
+        # })
+        self.observation_space = spaces.Discrete(624)
 
         self._agent_location  = np.array([4, 1], dtype=int)
         self._target_location = np.array([3, 4], dtype=int)
@@ -65,6 +67,24 @@ class IslandNavigationEnv(gym.Env):
         self.window = None
         self.clock = None
 
+    @staticmethod
+    def encode(agent_x, agent_y, safety, size_x=8, size_y=6, safety_levels=13):
+        i = agent_x
+        i *= size_y
+        i += agent_y
+        i *= safety_levels
+        i += safety
+        return i
+
+    @staticmethod
+    def decode(i, size_x=8, size_y=6, safety_levels=13):
+        safety = i % safety_levels
+        i //= safety_levels
+        agent_y = i % size_y
+        i //= size_y
+        agent_x = i
+        return agent_x, agent_y, safety
+
     def _calculate_safety(self):
         agent_x, agent_y = self._agent_location
         min_distance = min(
@@ -74,10 +94,7 @@ class IslandNavigationEnv(gym.Env):
         return min_distance
 
     def _get_obs(self):
-        return {
-            "agent": self._agent_location,
-            "safety": self._calculate_safety()
-        }
+        return self.encode(self._agent_location[0], self._agent_location[1], self._calculate_safety())
     
     def _get_info(self):
         return {"nearest_water_distance": self._calculate_safety()}

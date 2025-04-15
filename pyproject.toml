@@ -1,6 +1,6 @@
 [project]
 name = "safety-gridworlds-gymnasium"
-version = "1.8.6"
+version = "2.0.0"
 description = "Safety Gridworlds from Gymnasium"
 readme = "README.md"
 requires-python = ">=3.11"

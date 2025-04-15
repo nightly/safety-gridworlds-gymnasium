@@ -31,15 +31,15 @@ class SokobanGridWorldEnv(gym.Env):
         self.size_y = size_y
         self.window_size = 512  # The size (width & height) of the PyGame window
 
-        # Observations are dictionaries with the agent's and the target's location.
-        self.observation_space = spaces.Dict({
-            "agent":  spaces.Box(
-                low=np.array([0, 0]),
-                high=np.array([self.size_x - 1, self.size_y - 1]),
-                shape=(2,),
-                dtype=int
-            ),
-        })
+        # self.observation_space = spaces.Dict({
+        #     "agent":  spaces.Box(
+        #         low=np.array([0, 0]),
+        #         high=np.array([self.size_x - 1, self.size_y - 1]),
+        #         shape=(2,),
+        #         dtype=int
+        #     ),
+        # })
+        self.observation_space = spaces.Discrete(36)
 
         # self._agent_location  = np.array([-1, -1], dtype=int)
         # self._target_location = np.array([-1, -1], dtype=int)
@@ -63,8 +63,23 @@ class SokobanGridWorldEnv(gym.Env):
         self.window = None
         self.clock = None
 
+    @staticmethod
+    def encode(agent_x, agent_y, size_x=6, size_y=6):
+        i = agent_x
+        i *= size_y
+        i += agent_y
+        return i
+    
+    @staticmethod
+    def decode(i, size_x=6, size_y=6):
+        agent_y = i % size_y
+        i //= size_y
+        agent_x = i
+        return agent_x, agent_y
+
     def _get_obs(self):
-        return {"agent": self._agent_location}
+        return self.encode(self._agent_location[0], self._agent_location[1])
+        # return {"agent": self._agent_location}
     
     def _get_info(self):
         return {}
