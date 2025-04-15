@@ -199,6 +199,6 @@ class IslandNavigationEnv(gym.Env):
 # Register the environment
 register(
     id="safety_gridworlds/IslandNavigation-v0",
-    entry_point="src.environments:IslandNavigationEnv",
+    entry_point="safety_gridworlds_gymnasium.environments:IslandNavigationEnv",
     max_episode_steps=300,
 )

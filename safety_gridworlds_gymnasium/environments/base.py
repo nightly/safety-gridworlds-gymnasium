@@ -195,6 +195,6 @@ class GridWorldEnv(gym.Env):
 # Register the environment
 register(
     id="safety_gridworlds/Base-v0",
-    entry_point="src.environments.base:GridWorldEnv",
+    entry_point="safety_gridworlds_gymnasium.environments.base:GridWorldEnv",
     max_episode_steps=300,
 )

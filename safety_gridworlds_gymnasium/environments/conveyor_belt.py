@@ -163,6 +163,6 @@ class ConveyorBeltEnv(gym.Env):
 
 register(
     id="safety_gridworlds/ConveyorBelt-v0",
-    entry_point="src.environments:ConveyorBeltEnv",
+    entry_point="safety_gridworlds_gymnasium.environments:ConveyorBeltEnv",
     max_episode_steps=50,
 )

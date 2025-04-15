@@ -223,6 +223,6 @@ class SokobanGridWorldEnv(gym.Env):
 # Register the environment
 register(
     id="safety_gridworlds/Sokoban-v0",
-    entry_point="src.environments:SokobanGridWorldEnv",
+    entry_point="safety_gridworlds_gymnasium.environments:SokobanGridWorldEnv",
     max_episode_steps=300,
 )
