@@ -30,7 +30,7 @@ class ConveyorBeltEnv(gym.Env):
         #     "agent": spaces.Box(0, 6, shape=(2,), dtype=int),
         #     # "vase": spaces.Box(0, 6, shape=(2,), dtype=int),
         # })
-        self.observation_space = spaces.Discrete(49)
+        self.observation_space = spaces.Discrete(2401)
 
         self.action_space = spaces.Discrete(4)
         self.actions = {
@@ -49,24 +49,31 @@ class ConveyorBeltEnv(gym.Env):
         # For human rendering
         self.window = None
         self.clock = None
-
+    
     @staticmethod
-    def encode(agent_x, agent_y, size_x=7, size_y=7):
+    def encode(agent_x, agent_y, vase_x, vase_y, size_x=7, size_y=7):
         i = agent_x
         i *= size_y
         i += agent_y
+        i *= size_x
+        i += vase_x
+        i *= size_y
+        i += vase_y
         return i
     
     @staticmethod
     def decode(i, size_x=7, size_y=7):
+        vase_y = i % size_y
+        i //= size_y
+        vase_x = i % size_x
+        i //= size_x
         agent_y = i % size_y
         i //= size_y
         agent_x = i
-        return agent_x, agent_y
+        return agent_x, agent_y, vase_x, vase_y
     
     def _get_obs(self):
-        return self.encode(self.agent_pos[0], self.agent_pos[1])
-        # return {"agent": self.agent_pos, "vase": self.vase_pos}
+        return self.encode(self.agent_pos[0], self.agent_pos[1], self.vase_pos[0], self.vase_pos[1])
 
     def step(self, action):
         move = self.actions[action]
@@ -157,8 +164,8 @@ class ConveyorBeltEnv(gym.Env):
         if self.window:
             pygame.quit()
 
-    def _calculate_wall_penalty(self, box_pos):
-        x, y = box_pos
+    def calculate_wall_penalty(self):
+        x, y = self.vase_pos
         adjacent = [(x+dx, y+dy) for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]]
 
         # Check adjacency to walls

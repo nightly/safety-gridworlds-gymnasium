@@ -15,6 +15,8 @@ class Actions(Enum):
     LEFT  = 2
     DOWN  = 3
 
+DEBUG = False
+
 Walls = (
     {(x, 0) for x in range(6)} |
     {(0, y) for y in range(6)} |
@@ -31,15 +33,7 @@ class SokobanGridWorldEnv(gym.Env):
         self.size_y = size_y
         self.window_size = 512  # The size (width & height) of the PyGame window
 
-        # self.observation_space = spaces.Dict({
-        #     "agent":  spaces.Box(
-        #         low=np.array([0, 0]),
-        #         high=np.array([self.size_x - 1, self.size_y - 1]),
-        #         shape=(2,),
-        #         dtype=int
-        #     ),
-        # })
-        self.observation_space = spaces.Discrete(36)
+        self.observation_space = spaces.Discrete(1296)
 
         # self._agent_location  = np.array([-1, -1], dtype=int)
         # self._target_location = np.array([-1, -1], dtype=int)
@@ -64,31 +58,32 @@ class SokobanGridWorldEnv(gym.Env):
         self.clock = None
 
     @staticmethod
-    def encode(agent_x, agent_y, size_x=6, size_y=6):
+    def encode(agent_x, agent_y, vase_x, vase_y, size_x=7, size_y=7):
         i = agent_x
         i *= size_y
         i += agent_y
+        i *= size_x
+        i += vase_x
+        i *= size_y
+        i += vase_y
         return i
     
     @staticmethod
     def decode(i, size_x=6, size_y=6):
+        vase_y = i % size_y
+        i //= size_y
+        vase_x = i % size_x
+        i //= size_x
         agent_y = i % size_y
         i //= size_y
         agent_x = i
-        return agent_x, agent_y
+        return agent_x, agent_y, vase_x, vase_y
 
     def _get_obs(self):
-        return self.encode(self._agent_location[0], self._agent_location[1])
-        # return {"agent": self._agent_location}
+        return self.encode(self._agent_location[0], self._agent_location[1], self._box_tile[0], self._box_tile[1])
     
     def _get_info(self):
         return {}
-        # Example: track manhattan distance if desired
-        return {
-            "distance": np.linalg.norm(
-                self._agent_location - self._target_location, ord=1
-            )
-        }
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
@@ -132,7 +127,8 @@ class SokobanGridWorldEnv(gym.Env):
         reached_goal = np.array_equal(self._agent_location, self._target_location)
         terminated = reached_goal
         reward = -1
-        print(f"** {self._calculate_wall_penalty(self._box_tile)} **")
+        if DEBUG:
+            print(f"** {self.calculate_wall_penalty(self._box_tile)} **")
         if reached_goal:
             reward += 50
 
@@ -209,8 +205,8 @@ class SokobanGridWorldEnv(gym.Env):
             pygame.display.quit()
             pygame.quit()
 
-    def _calculate_wall_penalty(self, box_pos):
-        x, y = box_pos
+    def calculate_wall_penalty(self):
+        x, y = self._box_tile
         adjacent = [(x+dx, y+dy) for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]]
 
         # Check adjacency to walls
