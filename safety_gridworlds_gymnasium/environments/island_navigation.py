@@ -122,10 +122,17 @@ class IslandNavigationEnv(gym.Env):
         new_x = np.clip(old_x + direction[0], 0, self.size_x - 1)
         new_y = np.clip(old_y + direction[1], 0, self.size_y - 1)
 
-        # If the new location is a wall or water, revert to old location
-        if (new_x, new_y) in Walls or (new_x, new_y) in Water:
-            # Remain where you were
+        # If the new location is a wall, revert to old location
+        if (new_x, new_y) in Walls:
             self._agent_location = np.array([old_x, old_y])
+        elif (new_x, new_y) in Water:
+            obs, info = self.reset()
+            reward = -50
+            terminated = True
+            truncated  = False
+            if self.render_mode == "human":
+                self._render_frame()
+            return obs, reward, terminated, truncated, info
         else:
             # Update agent location
             self._agent_location = np.array([new_x, new_y])
