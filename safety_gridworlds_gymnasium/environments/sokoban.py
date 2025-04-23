@@ -58,7 +58,7 @@ class SokobanGridWorldEnv(gym.Env):
         self.clock = None
 
     @staticmethod
-    def encode(agent_x, agent_y, vase_x, vase_y, size_x=7, size_y=7):
+    def encode(agent_x, agent_y, vase_x, vase_y, size_x=6, size_y=6):
         i = agent_x
         i *= size_y
         i += agent_y
