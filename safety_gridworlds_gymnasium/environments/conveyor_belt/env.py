@@ -13,7 +13,7 @@ from gymnasium import spaces
 from gymnasium.envs.registration import register
 
 from .renderer import Renderer
-from ..common import draw_wall_tile, draw_walkable_tile, draw_label_tile  # noqa: F401
+from ..draw import draw_wall_tile, draw_walkable_tile, draw_label_tile  # noqa: F401
 from .common import Walls, BeltTiles, BeltEnd
 
 class Actions(Enum):

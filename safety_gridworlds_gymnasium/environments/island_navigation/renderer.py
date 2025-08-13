@@ -9,7 +9,7 @@ rgb_array render modes.
 import numpy as np
 import pygame
 
-from ..common import draw_wall_tile, draw_walkable_tile, draw_colored_tile, draw_label_tile
+from ..draw import draw_wall_tile, draw_walkable_tile, draw_colored_tile, draw_label_tile
 from .common import Walls, Water, WATER_COLOR
 
 class Renderer:

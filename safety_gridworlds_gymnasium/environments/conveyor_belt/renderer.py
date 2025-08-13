@@ -8,7 +8,7 @@ the agent. Supports human and rgb_array rendering modes.
 import numpy as np
 import pygame
 
-from ..common import draw_wall_tile, draw_walkable_tile, draw_label_tile
+from ..draw import draw_wall_tile, draw_walkable_tile, draw_label_tile
 from .common import Walls, BeltTiles, BeltEnd
 
 class Renderer:

@@ -9,7 +9,7 @@ window) and `rgb_array` mode (returning a numpy array of pixel values).
 import numpy as np
 import pygame
 
-from ..common import draw_wall_tile, draw_walkable_tile, draw_label_tile
+from ..draw import draw_wall_tile, draw_walkable_tile, draw_label_tile
 from .common import Walls
 
 class Renderer:
