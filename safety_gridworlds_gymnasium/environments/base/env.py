@@ -1,13 +1,11 @@
 from enum import Enum
-
 import numpy as np
-import pygame
-
 import gymnasium as gym
 from gymnasium import spaces
 from gymnasium.envs.registration import register
 
-from .common import *
+from .renderer import Renderer
+from .common import Walls
 
 class Actions(Enum):
     RIGHT = 0
@@ -15,18 +13,15 @@ class Actions(Enum):
     LEFT  = 2
     DOWN  = 3
 
-# Add as many wall coordinates as you like:
-Walls = {
-    (0, 1),
-}
-
 class GridWorldEnv(gym.Env):
+    """Simple gridworld environment with optional rendering."""
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
 
-    def __init__(self, render_mode=None, size_x=5, size_y=5):
+    def __init__(self, render_mode=None, size_x: int = 5, size_y: int = 5) -> None:
         self.size_x = size_x
         self.size_y = size_y
-        self.window_size = 512  # The size (width & height) of the PyGame window
+        # The size (width & height) of the PyGame window; forwarded to the renderer.
+        self.window_size = 512
 
         # Observations are dictionaries with the agent's and the target's location.
         self.observation_space = spaces.Dict({
@@ -44,10 +39,11 @@ class GridWorldEnv(gym.Env):
             ),
         })
 
+        # Agent and target start uninitialised until reset is called.
         self._agent_location  = np.array([-1, -1], dtype=int)
         self._target_location = np.array([-1, -1], dtype=int)
 
-        # We have 4 actions: "right", "up", "left", "down"
+        # We have 4 actions: "right", "up", "left", "down".
         self.action_space = spaces.Discrete(4)
         self._action_to_direction = {
             Actions.RIGHT.value: np.array([+1,  0]),
@@ -59,9 +55,9 @@ class GridWorldEnv(gym.Env):
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
 
-        # For human rendering
-        self.window = None
-        self.clock = None
+        # Instantiate the renderer; passes a reference to this environment so it can
+        # access state like the agent/target position.
+        self.renderer = Renderer(self)
 
     def _get_obs(self):
         return {"agent": self._agent_location, "target": self._target_location}
@@ -74,21 +70,19 @@ class GridWorldEnv(gym.Env):
             )
         }
 
-    def reset(self, seed=None, options=None):
+    def reset(self, seed: int | None = None, options: dict | None = None):  # type: ignore[override]
         super().reset(seed=seed)
-
         # Random initial locations
         self._agent_location = self.np_random.integers(
-                0, [self.size_x, self.size_y], dtype=int
+            0, [self.size_x, self.size_y], dtype=int
         )
-        while ((self._agent_location[0] == -1 and self._agent_location[1] == -1)
-              or ((self._agent_location[0], self._agent_location[1]) in Walls)
-        ):
+        # ensure agent not in walls
+        while (self._agent_location[0], self._agent_location[1]) in Walls:
             self._agent_location = self.np_random.integers(
                 0, [self.size_x, self.size_y], dtype=int
-        )
-        
-        # Ensure target differs from agent
+            )
+
+        # Ensure target differs from agent and not in walls
         self._target_location = self._agent_location.copy()
         while (
             np.array_equal(self._target_location, self._agent_location)
@@ -96,16 +90,17 @@ class GridWorldEnv(gym.Env):
         ):
             self._target_location = self.np_random.integers(
                 0, [self.size_x, self.size_y], dtype=int
-        )
+            )
 
         observation = self._get_obs()
         info = self._get_info()
 
         if self.render_mode == "human":
-            self._render_frame()
+            # Draw the initial frame
+            self.renderer.render("human")
         return observation, info
 
-    def step(self, action):
+    def step(self, action: int):  # type: ignore[override]
         # Current location
         old_x, old_y = self._agent_location
 
@@ -130,71 +125,29 @@ class GridWorldEnv(gym.Env):
         info = self._get_info()
 
         if self.render_mode == "human":
-            self._render_frame()
+            self.renderer.render("human")
 
         return observation, reward, terminated, False, info
 
     def render(self):
+        """
+        Render the current frame. For human render mode this draws to the
+        display. For rgb_array mode it returns a numpy array representation.
+        """
         if self.render_mode == "rgb_array":
-            return self._render_frame()
-
-    def _render_frame(self):
-        if self.window is None and self.render_mode == "human":
-            pygame.init()
-            pygame.display.init()
-            self.window = pygame.display.set_mode((self.window_size, self.window_size))
-        if self.clock is None and self.render_mode == "human":
-            self.clock = pygame.time.Clock()
-
-        canvas = pygame.Surface((self.window_size, self.window_size))
-        canvas.fill((255, 255, 255))
-
-        # Compute tile sizes
-        tile_size_x = self.window_size // self.size_x
-        tile_size_y = self.window_size // self.size_y
-
-        # Draw the grid (walkable or walls)
-        for row in range(self.size_y):
-            for col in range(self.size_x):
-                if (col, row) in Walls:
-                    # Draw a wall
-                    draw_wall_tile(canvas, col, row, tile_size_x, tile_size_y)
-                else:
-                    # Draw a walkable tile
-                    draw_walkable_tile(canvas, col, row, tile_size_x, tile_size_y)
-
-        # Draw agent
-        agent_x, agent_y = self._agent_location
-        draw_label_tile(
-            canvas, agent_x, agent_y, tile_size_x, tile_size_y,
-            label="A", fg_color=(0, 128, 255)
-        )
-
-        # Draw goal
-        goal_x, goal_y = self._target_location
-        draw_label_tile(
-            canvas, goal_x, goal_y, tile_size_x, tile_size_y,
-            label="G", fg_color=(0, 255, 0)
-        )
-
-        if self.render_mode == "human":
-            self.window.blit(canvas, canvas.get_rect())
-            pygame.event.pump()
-            pygame.display.update()
-            self.clock.tick(self.metadata["render_fps"])
-        else:  # "rgb_array"
-            return np.transpose(
-                pygame.surfarray.pixels3d(canvas), axes=(1, 0, 2)
-            )
+            return self.renderer.render("rgb_array")
+        elif self.render_mode == "human":
+            return self.renderer.render("human")
 
     def close(self):
-        if self.window is not None:
-            pygame.display.quit()
-            pygame.quit()
+        """
+        Clean up resources used by the renderer.
+        """
+        self.renderer.close()
 
 # Register the environment
 register(
     id="safety_gridworlds/Base-v0",
-    entry_point="safety_gridworlds_gymnasium.environments.base:GridWorldEnv",
+    entry_point="safety_gridworlds_gymnasium.environments.base.env:GridWorldEnv",
     max_episode_steps=300,
 )
