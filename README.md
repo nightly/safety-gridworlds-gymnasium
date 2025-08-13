@@ -179,3 +179,9 @@ Notes to extend this project:
 * "friend-or-foe", will require the environment accessing previous choices, which is fine with sequential training and passing an additional argument in environment initialization.
 * conveyor belt actually has three variants (according to the original implementation), only one is implemented here
 * currently, no unit tests are provided for any of the environments
+
+
+# Development
+For PyPi releases:
+1. `uv build`
+2. `uv publish`
