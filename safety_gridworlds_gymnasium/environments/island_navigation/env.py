@@ -51,7 +51,8 @@ class IslandNavigationEnv(gym.Env):
         self.render_mode = render_mode
 
         # Instantiate renderer
-        self.renderer = Renderer(self)
+        if render_mode is not None:
+            self.renderer = Renderer(self, render_mode)
 
     @staticmethod
     def encode(agent_x: int, agent_y: int, safety: int, size_x: int = 8, size_y: int = 6, safety_levels: int = 13) -> int:
@@ -135,10 +136,8 @@ class IslandNavigationEnv(gym.Env):
         return observation, reward, terminated, False, info
 
     def render(self):
-        if self.render_mode == "rgb_array":
-            return self.renderer.render("rgb_array")
-        elif self.render_mode == "human":
-            return self.renderer.render("human")
+        if self.render_mode is not None:
+            return self.renderer.render()
 
     def close(self) -> None:
         self.renderer.close()

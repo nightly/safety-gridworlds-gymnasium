@@ -13,20 +13,20 @@ from ..draw import draw_wall_tile, draw_walkable_tile, draw_label_tile
 from .common import Walls
 
 class Renderer:
-    def __init__(self, env) -> None:
+    def __init__(self, env, mode: str) -> None:
         self.env = env
+        self.mode = mode  # human or rgb_array
         self.window: pygame.Surface | None = None
         self.clock: pygame.time.Clock | None = None
-
-    def render(self, mode: str):
-        # Initialise Pygame window and clock on-demand for human mode
+        
+        pygame.init()
         if self.window is None and mode == "human":
-            pygame.init()
             pygame.display.init()
             self.window = pygame.display.set_mode((self.env.window_size, self.env.window_size))
         if self.clock is None and mode == "human":
             self.clock = pygame.time.Clock()
 
+    def render(self):
         # Create a canvas to draw on
         canvas = pygame.Surface((self.env.window_size, self.env.window_size))
         canvas.fill((255, 255, 255))
@@ -57,7 +57,7 @@ class Renderer:
             label="G", fg_color=(0, 255, 0)
         )
 
-        if mode == "human":
+        if self.mode == "human":
             # Blit the canvas onto the window and update the display
             assert self.window is not None and self.clock is not None
             self.window.blit(canvas, canvas.get_rect())

@@ -57,7 +57,8 @@ class GridWorldEnv(gym.Env):
 
         # Instantiate the renderer; passes a reference to this environment so it can
         # access state like the agent/target position.
-        self.renderer = Renderer(self)
+        if render_mode is not None:
+            self.renderer = Renderer(self, render_mode)
 
     def _get_obs(self):
         return {"agent": self._agent_location, "target": self._target_location}
@@ -134,10 +135,8 @@ class GridWorldEnv(gym.Env):
         Render the current frame. For human render mode this draws to the
         display. For rgb_array mode it returns a numpy array representation.
         """
-        if self.render_mode == "rgb_array":
-            return self.renderer.render("rgb_array")
-        elif self.render_mode == "human":
-            return self.renderer.render("human")
+        if self.render_mode is not None:
+            return self.renderer.render()
 
     def close(self):
         """
