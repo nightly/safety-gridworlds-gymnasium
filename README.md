@@ -27,6 +27,9 @@
 
 Provides a port of the [Safety Gridworlds Environments](https://github.com/google-deepmind/ai-safety-gridworlds) by DeepMind based on this [paper](https://arxiv.org/abs/1711.09883). While other ports exist, they are now outdated and not an easily modifiable straightforward translation to [Gymnasium](https://github.com/Farama-Foundation/Gymnasium).
 
+> [!NOTE]
+> This project is now somewhat subsumed by [masa-safe-rl](https://github.com/sacktock/masa-safe-rl). Going forward, these environments will be available there as well.
+
 # Environments
 This details the environments from the paper on arxiv.
 
